@@ -1,0 +1,26 @@
+g++ webserver.cpp -o my_program  -lpq -lpqxx -I.
+
+create table user_details(
+	id serial primary key,
+	username varchar(100) not null,
+	password varchar(100) not null
+);
+
+CREATE TABLE vehicles (
+    id              serial PRIMARY KEY,  -- corresponds to vehicle.id
+    number_of_wheels INT NOT NULL,
+    brand           VARCHAR(100) NOT NULL,
+    model           VARCHAR(100) NOT NULL,
+    year            INT NOT NULL,
+    base_price      NUMERIC(12, 2) NOT NULL,
+    kilometers      NUMERIC(12, 2) NOT NULL,
+    age             INT NOT NULL,
+    damage_level    INT CHECK (damage_level BETWEEN 0 AND 10),
+    category        VARCHAR(50) CHECK (
+                        category IN ('Sedan', 'Coupe', 'Hatchback', 'Convertible', 'Supercar')
+                     ),
+    -- Optional computed fields if you want to store precomputed prices:
+    depreciation_factor NUMERIC(5, 3),
+    min_price       NUMERIC(12, 2),
+    max_price       NUMERIC(12, 2)
+);

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vehicle List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background: #f5f5f5;
+    }
+    h1 {
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Vehicle List</h1>
+  <table id="vehicleTable">
+    <thead></thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function loadVehicles() {
+      const res = await fetch("/api/vehicles", { credentials: "include" });
+      const data = await res.json();
+
+      const table = document.getElementById("vehicleTable");
+      const thead = table.querySelector("thead");
+      const tbody = table.querySelector("tbody");
+
+      if (data.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='10'>No vehicles found</td></tr>";
+        return;
+      }
+
+      // Build table headers from object keys
+      const headers = Object.keys(data[0]);
+      thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
+
+      // Build rows
+      tbody.innerHTML = data.map(row => `
+        <tr>
+          ${headers.map(h => `<td>${row[h]}</td>`).join("")}
+        </tr>
+      `).join("");
+    }
+
+    loadVehicles();
+  </script>
+</body>
+</html>
