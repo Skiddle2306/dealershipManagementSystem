@@ -261,11 +261,12 @@ static json selectAllJSON_nlohmann(const string &table)
             // Prepare SQL statement with parameters
             W.conn().prepare("insert_vehicle",
                              "INSERT INTO vehicles "
-                             "( number_of_wheels, brand, model, year, base_price, kilometers, age, damage_level, category, depreciation_factor, min_price, max_price) "
-                             "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)");
+                             "( id,number_of_wheels, brand, model, year, base_price, kilometers, age, damage_level, category, depreciation_factor, min_price, max_price) "
+                             "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,$13)");
 
             // Execute prepared statement
             W.exec_prepared("insert_vehicle",
+                            v.getID(),
                             (v.getNumberOfWheels()),
                             (v.getBrand()),
                             (v.getModel()),
@@ -454,23 +455,91 @@ int main()
         string filecontent=filehandling::readFile("views/addVehicle.html");
         res.set_content((filecontent), "text/html"); });
 
-    svr.Post("/addVehicle", [](const httplib::Request &req, httplib::Response &res)
-             {
-                cout << "Trying to add vehicle" << endl;
-                try {
-        // 🔹 Extract form fields
-        string id              = req.get_param_value("id");
-        int numberOfWheels     = stoi(req.get_param_value("number_of_wheels"));
-        string brand           = req.get_param_value("brand");
-        string model           = req.get_param_value("model");
-        int year               = stoi(req.get_param_value("year"));
-        double basePrice       = stod(req.get_param_value("base_price"));
-        double kilometers      = stod(req.get_param_value("kilometers"));
-        int age                = stoi(req.get_param_value("age"));
-        int damageLevel        = stoi(req.get_param_value("damage_level"));
-        string category        = req.get_param_value("category");
-        // 🔹 Create the correct vehicle object
-        vehicle* v = nullptr;
+    // svr.Post("/addVehicle", [](const httplib::Request &req, httplib::Response &res)
+    //          {
+    //             const auto &form = req.form();
+    //             cout << "Trying to add vehicle" << endl;
+    //             try {
+    //     // 🔹 Extract form fields
+    //     string id              = req.get_param_value("id");
+    //     int numberOfWheels     = stoi(req.get_param_value("number_of_wheels"));
+    //     string brand           = req.get_param_value("brand");
+    //     string model           = req.get_param_value("model");
+    //     int year               = stoi(req.get_param_value("year"));
+    //     double basePrice       = stod(req.get_param_value("base_price"));
+    //     double kilometers      = stod(req.get_param_value("kilometers"));
+    //     int age                = stoi(req.get_param_value("age"));
+    //     int damageLevel        = stoi(req.get_param_value("damage_level"));
+    //     string category        = req.get_param_value("category");
+    //     // 🔹 Create the correct vehicle object
+    //     vehicle* v = nullptr;
+    //     if (category == "Sedan")
+    //         v = new sedan(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+    //     else if (category == "Coupe")
+    //         v = new coupe(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+    //     else if (category == "Hatchback")
+    //         v = new hatchback(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+    //     else if (category == "Convertible")
+    //         v = new convertible(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+    //     else if (category == "Supercar")
+    //         v = new supercar(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+    //     else
+    //         throw runtime_error("Unknown vehicle category");
+    //     v->depreciationFactor();
+    //     v->minPrice();
+    //     v->maxPrice();
+
+    //     std::string image_path;
+    //     // 🔹 Insert into database
+    //     database::addVehicle(*v);
+    //     delete v;
+    //     if (form.has_file("image")) {
+    //         auto file = form.get_file("image");
+
+    //         std::string filename = "./uploads/" + file.filename;
+    //         std::ofstream ofs(filename, std::ios::binary);
+    //         ofs << file.content;
+    //         ofs.close();
+
+    //         std::cout << "✅ File saved: " << filename << std::endl;
+    //     } else {
+    //         std::cout << "⚠️ No file uploaded" << std::endl;
+    //     }
+    // }
+    //     // 🔹 Respond to the client
+    //     res.set_redirect("/");
+    // }
+    // catch (const exception& e) {
+    //     cerr << "❌ Error adding vehicle: " << e.what() << endl;
+    //     res.status = 400;
+    //     res.set_content(string("Error: ") + e.what(), "text/plain");
+    //     res.set_redirect("/addVehicle.html");
+
+    // } });
+
+    svr.Post("/addVehicle", [](const httplib::Request &req, httplib::Response &res) {
+    std::cout << "🚗 Received request to add vehicle" << std::endl;
+
+    try {
+        // ✅ Get multipart form data
+        const auto &form = req.form;
+
+        // ✅ Extract form fields safely
+        std::string id              = form.get_field("id");
+        int numberOfWheels          = std::stoi(form.get_field("number_of_wheels"));
+        std::string brand           = form.get_field("brand");
+        std::string model           = form.get_field("model");
+        int year                    = std::stoi(form.get_field("year"));
+        double basePrice            = std::stod(form.get_field("base_price"));
+        double kilometers           = std::stod(form.get_field("kilometers"));
+        int age                     = std::stoi(form.get_field("age"));
+        int damageLevel             = std::stoi(form.get_field("damage_level"));
+        std::string category        = form.get_field("category");
+
+        
+
+        // ✅ Create correct vehicle object
+        vehicle *v = nullptr;
         if (category == "Sedan")
             v = new sedan(brand, model, year, id, basePrice, kilometers, age, damageLevel);
         else if (category == "Coupe")
@@ -482,38 +551,46 @@ int main()
         else if (category == "Supercar")
             v = new supercar(brand, model, year, id, basePrice, kilometers, age, damageLevel);
         else
-            throw runtime_error("Unknown vehicle category");
+            throw std::runtime_error("Unknown vehicle category");
+
+        // ✅ Compute prices
         v->depreciationFactor();
         v->minPrice();
         v->maxPrice();
 
-        std::string image_path;
-        // 🔹 Insert into database
+        // ✅ Insert into database
         database::addVehicle(*v);
         delete v;
-        // if (req.is_multipart_form_data()) {
-        //         if (req.files.find("image") != req.files.end()) {
-        //     const auto &file = req.files.at("image");
-        //     std::string upload_dir = "./templates/";
-        //     std::filesystem::create_directories(upload_dir);
+        std::string image_path = "./templates/"+id+".png";;
 
-        //     image_path = upload_dir + file.filename;
+        // ✅ Handle file upload
+        if (form.has_file("image")) {
+    auto file = form.get_file("image");
 
-        //     std::ofstream ofs(image_path, std::ios::binary);
-        //     ofs << file.content;
-        //     ofs.close();
-        // }
-    // }
-        // 🔹 Respond to the client
+    // Force the image to be named after the vehicle ID
+    std::string filename = "./templates/" + id + ".png";
+
+    std::ofstream ofs(filename, std::ios::binary);
+    ofs.write(file.content.data(), file.content.size());
+    ofs.close();
+
+    image_path = filename;
+    std::cout << "✅ File saved: " << filename << std::endl;
+} else {
+    std::cout << "⚠️ No file uploaded" << std::endl;
+}
+        // ✅ Redirect on success
         res.set_redirect("/");
     }
-    catch (const exception& e) {
-        cerr << "❌ Error adding vehicle: " << e.what() << endl;
+    catch (const std::exception &e) {
+        std::cerr << "❌ Error adding vehicle: " << e.what() << std::endl;
         res.status = 400;
-        res.set_content(string("Error: ") + e.what(), "text/plain");
+        res.set_content(std::string("Error adding vehicle: ") + e.what(), "text/plain");
         res.set_redirect("/addVehicle.html");
+    }
+});
 
-    } });
+
     svr.Get("/api/vehicles", [&session_ids](const httplib::Request &req, httplib::Response &res) {
     try {
         cout << "hi" << endl;

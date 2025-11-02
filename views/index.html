@@ -5,65 +5,349 @@
   <title>Vehicle List</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 30px;
-      background: #f5f5f5;
+      font-family: "Poppins", Arial, sans-serif;
+      margin: 0;
+      background: #fafafa;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
-    h1 {
-      text-align: center;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
+
+    /* Top bar */
+    header {
       background: white;
+      padding: 15px 40px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px 10px;
-      text-align: center;
+
+    h1 {
+      margin: 0;
+      font-weight: 600;
+      color: #222;
     }
-    th {
-      background-color: #007bff;
+
+    .add-btn {
+      background: #007bff;
       color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
     }
-    tr:nth-child(even) {
-      background-color: #f2f2f2;
+
+    .add-btn:hover {
+      background: #0056b3;
+    }
+
+    /* Layout container */
+    .container {
+      display: flex;
+      flex: 1;
+      padding: 20px 40px;
+      gap: 30px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      height: fit-content;
+      position: sticky;
+      top: 80px;
+    }
+
+    .sidebar h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #222;
+    }
+
+    .filter-group {
+      margin-bottom: 20px;
+    }
+
+    .filter-option {
+      display: block;
+      font-size: 14px;
+      margin: 6px 0;
+      cursor: pointer;
+    }
+
+    /* Vehicle grid */
+    .vehicle-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .vehicle-card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+
+    .vehicle-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+    }
+
+    .vehicle-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .vehicle-info {
+      padding: 12px 15px;
+    }
+
+    .vehicle-info h3 {
+      margin: 0;
+      font-size: 16px;
+      color: #222;
+      font-weight: 600;
+    }
+
+    .vehicle-info p {
+      margin: 4px 0;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .price {
+      font-weight: bold;
+      color: #007bff;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    /* Popups */
+    #popup, #addVehiclePopup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    #popup-content, #addVehicleContent {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      position: relative;
+    }
+
+    #popup img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    #closePopup, #closeAddPopup {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: left;
+    }
+
+    input, select {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    button.submit-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button.submit-btn:hover {
+      background: #218838;
     }
   </style>
 </head>
 <body>
-  <h1>Vehicle List</h1>
-  <table id="vehicleTable">
-    <thead></thead>
-    <tbody></tbody>
-  </table>
+  <header>
+    <h1>Vehicle List</h1>
+<a href="/addVehicle.html" class="add-btn">+ Add Vehicle</a>
+  </header>
+
+  <div class="container">
+    <!-- Sidebar filters -->
+    <aside class="sidebar">
+      <div class="filter-group">
+        <h3>Brand</h3>
+        <div id="brandFilters"></div>
+      </div>
+      <div class="filter-group">
+        <h3>Category</h3>
+        <div id="categoryFilters"></div>
+      </div>
+      <div class="filter-group">
+        <h3>Year</h3>
+        <div id="yearFilters"></div>
+      </div>
+      <button id="clearFilters" class="submit-btn" style="background:#6c757d;">Clear Filters</button>
+    </aside>
+
+    <!-- Vehicle grid -->
+    <div class="vehicle-grid" id="vehicleGrid"></div>
+  </div>
+
+  <!-- Vehicle Details Popup -->
+  <div id="popup">
+    <div id="popup-content">
+      <button id="closePopup">X</button>
+      <img id="vehicleImage" src="" alt="Vehicle Image">
+      <div id="vehicleDetails"></div>
+    </div>
+  </div>
+
+  <!-- Add Vehicle Popup -->
+  <div id="addVehiclePopup">
+    <div id="addVehicleContent">
+      <button id="closeAddPopup">X</button>
+      <h2>Add New Vehicle</h2>
+      <form id="addVehicleForm">
+        <input type="text" name="brand" placeholder="Brand" required>
+        <input type="text" name="model" placeholder="Model" required>
+        <input type="number" name="base_price" placeholder="Base Price" required>
+        <input type="number" name="year" placeholder="Year" required>
+        <input type="text" name="category" placeholder="Category (e.g. Sedan)" required>
+        <input type="number" name="damage_level" placeholder="Damage Level" required>
+        <input type="number" name="kilometers" placeholder="Kilometers" required>
+        <button type="submit" class="submit-btn">Add Vehicle</button>
+      </form>
+    </div>
+  </div>
 
   <script>
+    let allVehicles = [];
+    let activeFilters = { brand: null, category: null, year: null };
+
     async function loadVehicles() {
       const res = await fetch("/api/vehicles", { credentials: "include" });
       const data = await res.json();
+      allVehicles = data;
+      renderFilters(data);
+      renderVehicles(data);
+    }
 
-      const table = document.getElementById("vehicleTable");
-      const thead = table.querySelector("thead");
-      const tbody = table.querySelector("tbody");
-
+    function renderVehicles(data) {
+      const grid = document.getElementById("vehicleGrid");
       if (data.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='10'>No vehicles found</td></tr>";
+        grid.innerHTML = "<p>No vehicles found.</p>";
         return;
       }
 
-      // Build table headers from object keys
-      const headers = Object.keys(data[0]);
-      thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
-
-      // Build rows
-      tbody.innerHTML = data.map(row => `
-        <tr>
-          ${headers.map(h => `<td>${row[h]}</td>`).join("")}
-        </tr>
+      grid.innerHTML = data.map(v => `
+        <div class="vehicle-card" onclick='showPopup(${JSON.stringify(v)})'>
+          <img src="http://localhost:8080/${v.id}.png" 
+               onerror="this.src='https://via.placeholder.com/220x160?text=No+Image'">
+          <div class="vehicle-info">
+            <h3>${v.brand || "Unknown"} ${v.model || ""}</h3>
+            <p>Year: ${v.year}</p>
+            <p>Category: ${v.category}</p>
+            <p class="price">$${v.base_price}</p>
+          </div>
+        </div>
       `).join("");
     }
+
+    function renderFilters(data) {
+      const brands = [...new Set(data.map(v => v.brand))].filter(Boolean);
+      const categories = [...new Set(data.map(v => v.category))].filter(Boolean);
+      const years = [...new Set(data.map(v => v.year))].filter(Boolean).sort((a, b) => b - a);
+
+      const makeOptions = (items, type) =>
+        items.map(i => `
+          <label class="filter-option">
+            <input type="radio" name="${type}" value="${i}" onchange="applyFilter('${type}', '${i}')"> ${i}
+          </label>
+        `).join("");
+
+      document.getElementById("brandFilters").innerHTML = makeOptions(brands, "brand");
+      document.getElementById("categoryFilters").innerHTML = makeOptions(categories, "category");
+      document.getElementById("yearFilters").innerHTML = makeOptions(years, "year");
+    }
+
+    function applyFilter(type, value) {
+      activeFilters[type] = value;
+      let filtered = allVehicles;
+
+      Object.entries(activeFilters).forEach(([key, val]) => {
+        if (val) filtered = filtered.filter(v => String(v[key]) === val);
+      });
+
+      renderVehicles(filtered);
+    }
+
+    document.getElementById("clearFilters").addEventListener("click", () => {
+      activeFilters = { brand: null, category: null, year: null };
+      document.querySelectorAll(".sidebar input[type=radio]").forEach(i => i.checked = false);
+      renderVehicles(allVehicles);
+    });
+
+    function showPopup(vehicle) {
+      const popup = document.getElementById("popup");
+      const img = document.getElementById("vehicleImage");
+      const details = document.getElementById("vehicleDetails");
+
+      img.src = `http://localhost:8080/${vehicle.id}.png`;
+      img.onerror = () => img.src = "https://via.placeholder.com/400x250?text=No+Image";
+
+      details.innerHTML = Object.entries(vehicle)
+        .map(([k, v]) => `<p><strong>${k}:</strong> ${v}</p>`)
+        .join("");
+
+      popup.style.display = "flex";
+    }
+
+    document.getElementById("closePopup").addEventListener("click", () => {
+      document.getElementById("popup").style.display = "none";
+    });
+
 
     loadVehicles();
   </script>
