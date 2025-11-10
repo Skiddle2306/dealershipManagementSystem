@@ -605,7 +605,7 @@ int main()
                     res.set_redirect("/login.html");
                     return;
                 }
-
+        cout << "sent data" << endl;
         std::string filecontent = database::selectAllJSON_nlohmann("vehicles").dump(); // or just selectAllJSON()
         res.set_content(filecontent, "application/json");
         res.status = 200;
