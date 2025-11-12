@@ -367,32 +367,26 @@ public:
             double minP = v.minPrice();
             double maxP = v.maxPrice();
             // Prepare SQL statement with parameters
-            W.conn().prepare("insert_vehicle",
-                             "INSERT INTO vehicles "
-                             "( id,number_of_wheels, brand, model, year, base_price, kilometers, age, damage_level, category, depreciation_factor, min_price, max_price,vehicle_type) "
-                             "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,$13,$14)");
-                std::cout << "Vehicle type: [" << v.getType() << "]" << std::endl;
+            W.exec_params("INSERT INTO vehicles "
+              "(id, number_of_wheels, brand, model, year, base_price, kilometers, age, damage_level, category, depreciation_factor, min_price, max_price, vehicle_type) "
+              "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
+              v.getID(),
+              v.getNumberOfWheels(),
+              v.getBrand(),
+              v.getModel(),
+              v.getYear(),
+              v.getBasePrice(),
+              v.getKilometers(),
+              v.getAge(),
+              v.getDamageLevel(),
+              v.getCategory(),
+              dep,
+              minP,
+              maxP,
+              v.getType());
 
-            // Execute prepared statement
-            W.exec_prepared("insert_vehicle",
-                            v.getID(),
-                            (v.getNumberOfWheels()),
-                            (v.getBrand()),
-                            (v.getModel()),
-                            (v.getYear()),
-                            (v.getBasePrice()),
-                            (v.getKilometers()),
-                            (v.getAge()),
-                            (v.getDamageLevel()),
-                            (v.getCategory()),
-                            dep,
-                            minP,
-                            maxP,
-                        v.getType());
-
-            // Commit transaction
-            W.commit();
-
+W.commit();
+            
             cout << "✅ Vehicle inserted successfully: " << v.getID() << endl;
         }
         catch (const exception &e)
