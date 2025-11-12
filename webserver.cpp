@@ -114,6 +114,80 @@ public:
         : car(brand, model, year, id, basePrice, kilometers, age, damageLevel, "Supercar") {}
 };
 
+class bike : public vehicle
+{
+public:
+    bike(const string &brand, const string &model, int year,
+         const string &id, double basePrice, double kilometers, int age,
+         int damageLevel, const string &category)
+        : vehicle(2, brand, model, year, id, basePrice, kilometers, age, damageLevel, category) {
+        setNumberOfWheels(2);
+        setType("bike");
+    }
+};
+
+// subcategories
+class sports : public bike
+{
+public:
+    sports(const string &brand, const string &model, int year,
+           const string &id, double basePrice, double kilometers, int age, int damageLevel)
+        : bike(brand, model, year, id, basePrice, kilometers, age, damageLevel, "Sports") {}
+};
+
+class cruiser : public bike
+{
+public:
+    cruiser(const string &brand, const string &model, int year,
+            const string &id, double basePrice, double kilometers, int age, int damageLevel)
+        : bike(brand, model, year, id, basePrice, kilometers, age, damageLevel, "Cruiser") {}
+};
+
+class offroad : public bike
+{
+public:
+    offroad(const string &brand, const string &model, int year,
+            const string &id, double basePrice, double kilometers, int age, int damageLevel)
+        : bike(brand, model, year, id, basePrice, kilometers, age, damageLevel, "Offroad") {}
+};
+
+class touring : public bike
+{
+public:
+    touring(const string &brand, const string &model, int year,
+            const string &id, double basePrice, double kilometers, int age, int damageLevel)
+        : bike(brand, model, year, id, basePrice, kilometers, age, damageLevel, "Touring") {}
+};
+
+class truck : public vehicle
+{
+public:
+    truck(const string &brand, const string &model, int year,
+          const string &id, double basePrice, double kilometers, int age,
+          int damageLevel, const string &category)
+        : vehicle(4, brand, model, year, id, basePrice, kilometers, age, damageLevel, category) {
+        setNumberOfWheels(4);
+        setType("truck");
+    }
+};
+
+// subcategories
+class pickup : public truck
+{
+public:
+    pickup(const string &brand, const string &model, int year,
+           const string &id, double basePrice, double kilometers, int age, int damageLevel)
+        : truck(brand, model, year, id, basePrice, kilometers, age, damageLevel, "Pickup") {}
+};
+
+class tow : public truck
+{
+public:
+    tow(const string &brand, const string &model, int year,
+        const string &id, double basePrice, double kilometers, int age, int damageLevel)
+        : truck(brand, model, year, id, basePrice, kilometers, age, damageLevel, "Tow") {}
+};
+
 class database
 {
     static pqxx::connection *conn;
@@ -511,18 +585,30 @@ int main()
 
         // ✅ Create correct vehicle object
         vehicle *v = nullptr;
-        if (category == "Sedan")
-            v = new sedan(brand, model, year, id, basePrice, kilometers, age, damageLevel);
-        else if (category == "Coupe")
-            v = new coupe(brand, model, year, id, basePrice, kilometers, age, damageLevel);
-        else if (category == "Hatchback")
-            v = new hatchback(brand, model, year, id, basePrice, kilometers, age, damageLevel);
-        else if (category == "Convertible")
-            v = new convertible(brand, model, year, id, basePrice, kilometers, age, damageLevel);
-        else if (category == "Supercar")
-            v = new supercar(brand, model, year, id, basePrice, kilometers, age, damageLevel);
-        else
-            throw std::runtime_error("Unknown vehicle category");
+if (category == "Sedan")
+    v = new sedan(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+else if (category == "Coupe")
+    v = new coupe(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+else if (category == "Hatchback")
+    v = new hatchback(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+else if (category == "Convertible")
+    v = new convertible(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+else if (category == "Supercar")
+    v = new supercar(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+else if (category == "Sports")
+    v = new sports(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+else if (category == "Cruiser")
+    v = new cruiser(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+else if (category == "Offroad")
+    v = new offroad(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+else if (category == "Touring")
+    v = new touring(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+else if (category == "Pickup")
+    v = new pickup(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+else if (category == "Tow")
+    v = new tow(brand, model, year, id, basePrice, kilometers, age, damageLevel);
+else
+    throw std::runtime_error("Unknown vehicle category");
 
         // ✅ Compute prices
         v->depreciationFactor();
