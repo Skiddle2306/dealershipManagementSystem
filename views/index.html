@@ -2,219 +2,629 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Vehicle List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Showroom</title>
   <style>
-    body {
-      font-family: "Poppins", Arial, sans-serif;
-      margin: 0;
-      background: #fafafa;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
+    /* Modern Color Palette with Gradients */
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --primary-light: #3b82f6;
+      --secondary: #8b5cf6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
+      --shadow-xl: 0 20px 40px rgba(0,0,0,0.2);
     }
 
-    /* Top bar */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Enhanced Header with Gradient */
     header {
-      background: white;
-      padding: 15px 40px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      padding: 20px 40px;
+      box-shadow: var(--shadow-lg);
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: sticky;
       top: 0;
       z-index: 100;
+      backdrop-filter: blur(10px);
     }
 
     h1 {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
       margin: 0;
-      font-weight: 600;
-      color: #222;
+      font-weight: 800;
+      color: white;
+      font-size: 28px;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+    }
+
+    h1::before {
+      content: "🚗";
+      font-size: 32px;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .logout-btn {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logout-btn::before {
+      content: "←";
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.9);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateX(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .logout-btn:active {
+      transform: translateX(-1px);
     }
 
     .add-btn {
-      background: #007bff;
-      color: white;
+      background: white;
+      color: var(--primary);
       border: none;
-      padding: 10px 18px;
-      border-radius: 6px;
+      padding: 12px 24px;
+      border-radius: 12px;
       font-size: 14px;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-md);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .add-btn::before {
+      content: "+";
+      font-size: 20px;
+      font-weight: 700;
     }
 
     .add-btn:hover {
-      background: #0056b3;
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-xl);
+      background: linear-gradient(135deg, white 0%, #f0f9ff 100%);
     }
 
-    /* Layout container */
+    .add-btn:active {
+      transform: translateY(-1px);
+    }
+
+    /* Layout Container */
     .container {
       display: flex;
       flex: 1;
-      padding: 20px 40px;
+      padding: 30px 40px;
       gap: 30px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
     }
 
-    /* Sidebar */
+    /* Enhanced Sidebar with Glass Effect */
     .sidebar {
-      width: 220px;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      width: 280px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: var(--shadow-lg);
       height: fit-content;
       position: sticky;
-      top: 80px;
+      top: 110px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+      align-self: flex-start;
+    }
+
+    .sidebar:hover {
+      box-shadow: var(--shadow-xl);
+      transform: translateX(-2px);
     }
 
     .sidebar h3 {
-      font-size: 16px;
-      margin-bottom: 10px;
-      color: #222;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 15px;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .sidebar h3::before {
+      content: "●";
+      color: var(--secondary);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
 
     .filter-group {
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
 
     .filter-option {
-      display: block;
+      display: flex;
+      align-items: center;
       font-size: 14px;
-      margin: 6px 0;
+      margin: 10px 0;
       cursor: pointer;
+      color: var(--text-secondary);
+      padding: 8px 12px;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      position: relative;
     }
 
-    /* Vehicle grid */
+    .filter-option:hover {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      color: var(--primary);
+      transform: translateX(5px);
+    }
+
+    .filter-option input[type="radio"] {
+      margin-right: 10px;
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
+
+    .filter-option input[type="radio"]:checked + span {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .filter-option input[type="radio"]:checked {
+      transform: scale(1.1);
+    }
+
+    /* Enhanced Vehicle Grid */
     .vehicle-grid {
       flex: 1;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 25px;
+      align-content: start;
     }
 
+    /* Premium Vehicle Cards */
     .vehicle-card {
       background: white;
-      border-radius: 10px;
+      border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: var(--shadow-md);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .vehicle-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .vehicle-card:hover::before {
+      transform: scaleX(1);
     }
 
     .vehicle-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: var(--shadow-xl);
+      border-color: var(--primary-light);
     }
 
     .vehicle-card img {
       width: 100%;
-      height: 160px;
+      height: 200px;
       object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .vehicle-card:hover img {
+      transform: scale(1.1);
     }
 
     .vehicle-info {
-      padding: 12px 15px;
+      padding: 20px;
     }
 
     .vehicle-info h3 {
-      margin: 0;
-      font-size: 16px;
-      color: #222;
-      font-weight: 600;
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      color: var(--text-primary);
+      font-weight: 800;
+      letter-spacing: -0.5px;
     }
 
     .vehicle-info p {
-      margin: 4px 0;
-      font-size: 13px;
-      color: #666;
+      margin: 6px 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .vehicle-info p::before {
+      content: "•";
+      color: var(--primary);
+      font-weight: bold;
     }
 
     .price {
-      font-weight: bold;
-      color: #007bff;
-      margin-top: 8px;
-      font-size: 14px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-top: 12px;
+      font-size: 22px;
+      letter-spacing: -0.5px;
     }
 
-    /* Popups */
+    /* Enhanced Popups */
     #popup, #addVehiclePopup {
       display: none;
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
       justify-content: center;
       align-items: center;
       z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     #popup-content, #addVehicleContent {
       background: white;
-      padding: 25px;
-      border-radius: 10px;
+      padding: 30px;
+      border-radius: 24px;
       width: 90%;
-      max-width: 500px;
-      text-align: center;
+      max-width: 700px;
+      max-height: 90vh;
+      overflow-y: auto;
       position: relative;
+      box-shadow: var(--shadow-xl);
+      animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--border);
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    #popup-content::-webkit-scrollbar,
+    #addVehicleContent::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #popup-content::-webkit-scrollbar-track,
+    #addVehicleContent::-webkit-scrollbar-track {
+      background: var(--background);
+      border-radius: 10px;
+    }
+
+    #popup-content::-webkit-scrollbar-thumb,
+    #addVehicleContent::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 10px;
     }
 
     #popup img {
       width: 100%;
-      border-radius: 10px;
-      margin-bottom: 15px;
+      max-width: 100%;
+      height: auto;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      object-fit: cover;
+      box-shadow: var(--shadow-md);
     }
 
     #closePopup, #closeAddPopup {
       position: absolute;
-      top: 10px;
-      right: 15px;
-      background: red;
+      top: 20px;
+      right: 20px;
+      background: var(--danger);
       color: white;
       border: none;
-      border-radius: 4px;
-      padding: 6px 10px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 800;
+      font-size: 18px;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-md);
+    }
+
+    #closePopup:hover, #closeAddPopup:hover {
+      background: #dc2626;
+      transform: rotate(90deg) scale(1.1);
+      box-shadow: var(--shadow-lg);
+    }
+
+    #vehicleDetails h2 {
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    #vehicleDetails p {
+      margin: 12px 0;
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    #vehicleDetails hr {
+      margin: 20px 0;
+      border: none;
+      border-top: 2px solid var(--border);
     }
 
     form {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 16px;
       text-align: left;
     }
 
     input, select {
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 14px;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 15px;
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
     }
 
     button.submit-btn {
-      background: #28a745;
+      background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
       color: white;
       border: none;
-      border-radius: 6px;
-      padding: 10px;
+      border-radius: 12px;
+      padding: 14px 20px;
       cursor: pointer;
       margin-top: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-md);
     }
 
     button.submit-btn:hover {
-      background: #218838;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    button.submit-btn:active {
+      transform: translateY(0);
+    }
+
+    #clearFilters {
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+      margin-top: 10px;
+    }
+
+    #clearFilters:hover {
+      background: linear-gradient(135deg, #4b5563 0%, #374151 100%) !important;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+      grid-column: 1 / -1;
+    }
+
+    .empty-state::before {
+      content: "🔍";
+      font-size: 64px;
+      display: block;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .vehicle-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 20px;
+        gap: 20px;
+      }
+
+      .sidebar {
+        width: 100%;
+        position: static;
+      }
+
+      header {
+        padding: 15px 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+        position: relative;
+      }
+
+      .logout-btn {
+        position: absolute;
+        left: 20px;
+        padding: 8px 16px;
+        font-size: 12px;
+      }
+
+      h1 {
+        position: static;
+        transform: none;
+        font-size: 18px;
+        order: 2;
+        width: 100%;
+        justify-content: center;
+        margin: 10px 0;
+      }
+
+      h1::before {
+        font-size: 24px;
+      }
+
+      .add-btn {
+        position: absolute;
+        right: 20px;
+        padding: 8px 16px;
+        font-size: 12px;
+      }
+
+      .vehicle-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+      }
+
+      #popup-content, #addVehicleContent {
+        max-width: 95%;
+        padding: 20px;
+        margin: 10px;
+      }
+
+      .vehicle-card img {
+        height: 160px;
+      }
+    }
+
+    /* Loading Animation */
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+
+    .loading {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 1000px 100%;
+      animation: shimmer 2s infinite;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Vehicle List</h1>
-<a href="/addVehicle.html" class="add-btn">+ Add Vehicle</a>
+    <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    <h1>Vehicle Management System</h1>
+    <a href="/addVehicle.html" class="add-btn">Add Vehicle</a>
   </header>
 
   <div class="container">
-    <!-- Sidebar filters -->
     <aside class="sidebar">
       <div class="filter-group">
         <h3>Brand</h3>
@@ -228,26 +638,23 @@
         <h3>Year</h3>
         <div id="yearFilters"></div>
       </div>
-      <button id="clearFilters" class="submit-btn" style="background:#6c757d;">Clear Filters</button>
+      <button id="clearFilters" class="submit-btn">Clear Filters</button>
     </aside>
 
-    <!-- Vehicle grid -->
     <div class="vehicle-grid" id="vehicleGrid"></div>
   </div>
 
-  <!-- Vehicle Details Popup -->
   <div id="popup">
     <div id="popup-content">
-      <button id="closePopup">X</button>
+      <button id="closePopup">×</button>
       <img id="vehicleImage" src="" alt="Vehicle Image">
       <div id="vehicleDetails"></div>
     </div>
   </div>
 
-  <!-- Add Vehicle Popup -->
   <div id="addVehiclePopup">
     <div id="addVehicleContent">
-      <button id="closeAddPopup">X</button>
+      <button id="closeAddPopup">×</button>
       <h2>Add New Vehicle</h2>
       <form id="addVehicleForm">
         <input type="text" name="brand" placeholder="Brand" required>
@@ -265,90 +672,118 @@
   <script>
     let allVehicles = [];
     let activeFilters = { brand: null, category: null, year: null };
-
+    
+    // Load vehicles from server
     async function loadVehicles() {
-      const res = await fetch("/api/vehicles", { credentials: "include" });
-      const data = await res.json();
-      allVehicles = data;
-      renderFilters(data);
-      renderVehicles(data);
+      try {
+        const response = await fetch('/api/vehicles');
+        if (!response.ok) throw new Error('Failed to fetch vehicles');
+        const data = await response.json();
+        allVehicles = data;
+        renderFilters(data);
+        renderVehicles(data);
+      } catch (error) {
+        console.error('Error loading vehicles:', error);
+        document.getElementById("vehicleGrid").innerHTML = 
+          '<div class="empty-state"><h3>Error loading vehicles</h3><p>Please try again later</p></div>';
+      }
     }
-
+    
+    // Render vehicles to grid
     function renderVehicles(data) {
       const grid = document.getElementById("vehicleGrid");
+      
       if (data.length === 0) {
-        grid.innerHTML = "<p>No vehicles found.</p>";
+        grid.innerHTML = '<div class="empty-state"><h3>No vehicles found</h3><p>Try adjusting your search criteria</p></div>';
         return;
       }
-
+      
       grid.innerHTML = data.map(v => `
         <div class="vehicle-card" onclick='showPopup(${JSON.stringify(v)})'>
           <img src="http://localhost:8080/${v.id}.png" 
-               onerror="this.src='https://via.placeholder.com/220x160?text=No+Image'">
+               onerror="this.src='https://via.placeholder.com/280x200/2563eb/ffffff?text=No+Image'">
           <div class="vehicle-info">
             <h3>${v.brand || "Unknown"} ${v.model || ""}</h3>
             <p>Year: ${v.year}</p>
             <p>Category: ${v.category}</p>
-            <p class="price">$${v.base_price}</p>
+            <p class="price">${v.base_price}</p>
           </div>
         </div>
       `).join("");
     }
-
+    
+    // Render filter options
     function renderFilters(data) {
       const brands = [...new Set(data.map(v => v.brand))].filter(Boolean);
       const categories = [...new Set(data.map(v => v.category))].filter(Boolean);
       const years = [...new Set(data.map(v => v.year))].filter(Boolean).sort((a, b) => b - a);
-
+      
       const makeOptions = (items, type) =>
         items.map(i => `
           <label class="filter-option">
-            <input type="radio" name="${type}" value="${i}" onchange="applyFilter('${type}', '${i}')"> ${i}
+            <input type="radio" name="${type}" value="${i}" onchange="applyFilter('${type}', '${i}')">
+            <span>${i}</span>
           </label>
         `).join("");
-
+      
       document.getElementById("brandFilters").innerHTML = makeOptions(brands, "brand");
       document.getElementById("categoryFilters").innerHTML = makeOptions(categories, "category");
       document.getElementById("yearFilters").innerHTML = makeOptions(years, "year");
     }
-
+    
+    // Apply filter
     function applyFilter(type, value) {
       activeFilters[type] = value;
       let filtered = allVehicles;
-
+      
       Object.entries(activeFilters).forEach(([key, val]) => {
         if (val) filtered = filtered.filter(v => String(v[key]) === val);
       });
-
+      
       renderVehicles(filtered);
     }
-
+    
+    // Clear all filters
     document.getElementById("clearFilters").addEventListener("click", () => {
       activeFilters = { brand: null, category: null, year: null };
       document.querySelectorAll(".sidebar input[type=radio]").forEach(i => i.checked = false);
       renderVehicles(allVehicles);
     });
-
+    
+    // Show popup with vehicle details
     function showPopup(vehicle) {
       const popup = document.getElementById("popup");
       const img = document.getElementById("vehicleImage");
       const details = document.getElementById("vehicleDetails");
-
+      
       img.src = `http://localhost:8080/${vehicle.id}.png`;
-      img.onerror = () => img.src = "https://via.placeholder.com/400x250?text=No+Image";
-
+      img.onerror = () => img.src = "https://via.placeholder.com/700x400/2563eb/ffffff?text=No+Image";
+      
       details.innerHTML = Object.entries(vehicle)
         .map(([k, v]) => `<p><strong>${k}:</strong> ${v}</p>`)
         .join("");
-
+      
       popup.style.display = "flex";
     }
-
+    
+    // Close popup
     document.getElementById("closePopup").addEventListener("click", () => {
       document.getElementById("popup").style.display = "none";
     });
-
-
+    
+    // Expose functions globally for inline onclick handlers
+    window.showPopup = showPopup;
+    window.applyFilter = applyFilter;
+    
+    // Logout handler
+    window.handleLogout = function() {
+      if (confirm('Are you sure you want to logout?')) {
+        // Add your logout logic here
+        window.location.href = '/logout'; // or wherever your logout endpoint is
+      }
+    };
+    
+    // Initialize on page load
     loadVehicles();
   </script>
 </body>

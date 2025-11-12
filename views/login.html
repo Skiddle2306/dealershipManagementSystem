@@ -3,187 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dearlership Login</title>
+    <title>Vehicle Management System - Login</title>
     <style>
         :root {
-            --theme-color: #63FFB6;
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #63FFB6;
+            --hover-color: #50d89f;
         }
         
-        body {
-            font-family: 'Inter', sans-serif;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f3f4f6;
-          
-        }
-        .navbar {
-            display: flex;
-            width: 782px;
-            height: 62px;
-            background-color: rgb(250, 250, 250);
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 52.53px;
-            align-items: center;
-            padding: 0 9px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            justify-content: space-between;
-            z-index: 1000;
+            min-height: 100vh;
+            background-color: white;
+            padding: 20px;
         }
 
-        .navbar-left {
-            display: flex;
-            align-items: center;
-        }
-
-        .navbar-logo {
-            height: 50px;
-            width: 50px;
-        }
-
-        .navbar-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-
-        .navbar-menu {
-            display: flex;
-            justify-content: center;
-            flex-grow: 1;
-            gap: 25px;
-        }
-
-        .navbar-menu a {
-            text-decoration: none;
-            color: black;
-            padding: 5px 10px;
-            transition: background 0.3s ease;
-            border-radius: 52.53px;
-        }
-
-        .navbar-menu a:hover,
-        .navbar-menu a.active {
-            background: var(--theme-color);
-        }
-
-        .navbar-right {
-            display: flex;
-            gap: 10px;
-            margin-left: auto;
-        }
-
-        .navbar-right a {
-            text-decoration: none;
-            color: black;
-            padding: 5px 15px;
-            border-radius: 15px;
-            transition: background 0.3s ease;
-        }
-
-        .navbar-right a:hover {
-            background: var(--theme-color);
-        }
-
-        .logout:hover {
-            background: rgb(255, 175, 175) !important;
-            transform: scale(1.05);
-        }
         .card-container {
-            width: 350px;
-            height: 450px;
+            width: 420px;
+            height: 550px;
             perspective: 1000px;
         }
+
         .card {
             width: 100%;
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.6s;
+            transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
+
         .card.flipped {
             transform: rotateY(180deg);
         }
+
         .card-face {
             width: 100%;
             height: 100%;
             position: absolute;
             backface-visibility: hidden;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background: #1e3a8a;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 40px 35px;
         }
+
         .card-back {
             transform: rotateY(180deg);
         }
+
+        h2 {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #e0e7ff;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        form {
+            width: 100%;
+        }
+
         .input-field {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
+            padding: 14px 18px;
+            margin: 12px 0;
+            border: 2px solid #3b5998;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #2c5282;
+            color: white;
         }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #63FFB6;
+            background-color: #3b5998;
+            box-shadow: 0 0 0 3px rgba(99, 255, 182, 0.2);
+        }
+
+        .input-field::placeholder {
+            color: #cbd5e0;
+        }
+
+        select.input-field {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2363FFB6' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            padding-right: 45px;
+        }
+
+        select.input-field option {
+            background-color: #2c5282;
+            color: white;
+        }
+
         .button {
             width: 100%;
-            padding: 10px;
-            background: var(--theme-color);
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: white;
             cursor: pointer;
-            margin: 10px 0;
-            transition: background 0.3s ease;
+            margin: 20px 0 15px 0;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
+
         .button:hover {
-            background: #50d89f;
-            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
         }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
         .toggle-link {
             text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-            color: blue;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #63FFB6;
             cursor: pointer;
-            text-decoration: underline;
+            text-decoration: none;
             display: block;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
 
+        .toggle-link:hover {
+            color: #50d89f;
+            text-decoration: underline;
+        }
+
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 480px) {
+            .card-container {
+                width: 100%;
+                max-width: 380px;
+                height: 520px;
+            }
+
+            .card-face {
+                padding: 30px 25px;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    
     <div class="card-container">
         <div class="card" id="card">
-            <div class="card-face card-front login-container">
-                <h2>Dearlership Login</h2>
-              <form action="/login" method="POST">
-                <input type="text" class="input-field" placeholder="Username" id="username" name="username" required>
-                <input type="password" class="input-field" placeholder="Password" id="password" name="password" required>
-                <button type="submit" class="button">Login</button>
-                <span class="toggle-link" onclick="flipCard()">New here? Sign up</span>
-              </form>
+            <!-- Login Card -->
+            <div class="card-face card-front">
+                <div class="icon">🚗</div>
+                <h2>Vehicle Management</h2>
+                <p class="subtitle">Login to your account</p>
+                <form action="/login" method="POST">
+                    <input type="text" class="input-field" placeholder="Username" id="username" name="username" required>
+                    <input type="password" class="input-field" placeholder="Password" id="password" name="password" required>
+                    <button type="submit" class="button">Login</button>
+                    <span class="toggle-link" onclick="flipCard()">New here? Create an account →</span>
+                </form>
             </div>
+
+            <!-- Sign Up Card -->
             <div class="card-face card-back">
-                <h2>Sign Up</h2>
+                <div class="icon">📝</div>
+                <h2>Create Account</h2>
+                <p class="subtitle">Join our vehicle management system</p>
                 <form action="/register" method="POST">
-                    <input type="text" class="input-field" placeholder="Name" id="name" name="Name" >
-                    <input type="text" class="input-field" placeholder="Email" id="email" name="Email" >
-                    <input type="password" class="input-field" placeholder="Password" id="Password" name="Password" >
-                    <input type="password" class="input-field" placeholder="Confirm Password" id="ConfirmPassword" name="ConfirmPassword" >
-                    <select class="input-field" name="City">
-                        <option value="">Select City</option>
+                    <input type="text" class="input-field" placeholder="Full Name" id="name" name="Name" required>
+                    <input type="email" class="input-field" placeholder="Email Address" id="email" name="Email" required>
+                    <input type="password" class="input-field" placeholder="Password" id="Password" name="Password" required>
+                    <input type="password" class="input-field" placeholder="Confirm Password" id="ConfirmPassword" name="ConfirmPassword" required>
+                    <select class="input-field" name="City" required>
+                        <option value="">Select Your City</option>
                         <option value="Mumbai">Mumbai</option>
                         <option value="Pune">Pune</option>
                         <option value="Nagpur">Nagpur</option>
@@ -206,11 +236,12 @@
                         <option value="Beed">Beed</option>
                     </select>
                     <button type="submit" class="button">Sign Up</button>
+                    <span class="toggle-link" onclick="flipCard()">← Already have an account? Login</span>
                 </form>
-                <span class="toggle-link" onclick="flipCard()">Already have an account? Login</span>
             </div>
         </div>
     </div>
+
     <script>
         function flipCard() {
             document.getElementById("card").classList.toggle("flipped");
@@ -218,29 +249,3 @@
     </script>
 </body>
 </html>
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Login</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="login-container">
-        <h2>Login</h2>
-        <form action="/login" method="POST">
-            <div class="input-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="input-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit">Login</button>
-        </form>
-    </div>
-</body>
-</html> -->
