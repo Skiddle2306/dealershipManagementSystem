@@ -13,7 +13,7 @@ using namespace std;
 
 class vehicle
 {
-
+    string vehicle_type;
     int numberOfWheels;
     string brand;
     string model;
@@ -47,6 +47,9 @@ public:
     int getAge() const { return age; }
     int getDamageLevel() const { return damageLevel; }
     const string &getCategory() const { return category; }
+    const string &getType() const { return vehicle_type; }
+    void setType(string t) { vehicle_type=t; }
+    void setNumberOfWheels(int t) { numberOfWheels=t; }
 
     // --- pricing logic ---
     double depreciationFactor() const
@@ -68,7 +71,10 @@ public:
     car(const string &brand, const string &model, int year,
         const string &id, double basePrice, double kilometers, int age,
         int damageLevel, const string &category)
-        : vehicle(4, brand, model, year, id, basePrice, kilometers, age, damageLevel, category) {}
+        : vehicle(4, brand, model, year, id, basePrice, kilometers, age, damageLevel, category) {
+            setNumberOfWheels(4);
+            setType("car");
+        }
 };
 
 // subcategories
@@ -175,50 +181,61 @@ public:
         }
     }
 
+    static json selectAllJSON_nlohmann(const string &table)
+    {
+        json arr = json::array();
 
+        try
+        {
+            pqxx::nontransaction txn(*conn);
+            pqxx::result r = txn.exec("SELECT * FROM " + table);
 
-static json selectAllJSON_nlohmann(const string &table)
-{
-    json arr = json::array();
+            for (const auto &row : r)
+            {
+                json obj;
+                for (pqxx::row::size_type col = 0; col < row.size(); ++col)
+                {
+                    const string name = r.column_name(col);
 
-    try {
-        pqxx::nontransaction txn(*conn);
-        pqxx::result r = txn.exec("SELECT * FROM " + table);
+                    if (row[col].is_null())
+                    {
+                        obj[name] = nullptr;
+                    }
+                    else
+                    {
+                        string sval = row[col].c_str();
 
-        for (const auto &row : r) {
-            json obj;
-            for (pqxx::row::size_type col = 0; col < row.size(); ++col) {
-                const string name = r.column_name(col);
-
-                if (row[col].is_null()) {
-                    obj[name] = nullptr;
-                } else {
-                    string sval = row[col].c_str();
-
-                    // Try to parse as integer then double; fallback to string.
-                    try {
-                        // try integer
-                        long long ival = stoll(sval);
-                        obj[name] = ival;
-                    } catch (...) {
-                        try {
-                            double dval = stod(sval);
-                            obj[name] = dval;
-                        } catch (...) {
-                            obj[name] = sval;
+                        // Try to parse as integer then double; fallback to string.
+                        try
+                        {
+                            // try integer
+                            long long ival = stoll(sval);
+                            obj[name] = ival;
+                        }
+                        catch (...)
+                        {
+                            try
+                            {
+                                double dval = stod(sval);
+                                obj[name] = dval;
+                            }
+                            catch (...)
+                            {
+                                obj[name] = sval;
+                            }
                         }
                     }
                 }
+                arr.push_back(obj);
             }
-            arr.push_back(obj);
         }
-    } catch (const exception &e) {
-        cerr << "Error: " << e.what() << '\n';
+        catch (const exception &e)
+        {
+            cerr << "Error: " << e.what() << '\n';
+        }
+
+        return arr;
     }
-
-    return arr;
-}
-
 
     static bool checkPassword(string username, string password)
     {
@@ -250,6 +267,23 @@ static json selectAllJSON_nlohmann(const string &table)
             return false;
         }
     }
+    static string newId(){
+        try {
+        pqxx::nontransaction txn(*conn);
+        pqxx::result r = txn.exec("SELECT MAX(id) AS max_id FROM vehicles");
+
+        int new_id=1;; // default if table is empty
+        if (!r.empty() && !r[0]["max_id"].is_null()) {
+            new_id = (r[0]["max_id"].as<int>() + 1);
+        }
+        cout << "Id : " << newId << endl;
+        return to_string(new_id);
+    } catch (const std::exception& e) {
+        std::cerr << "Database error: " << e.what() << std::endl;
+        return "-1"; // indicate error
+    }
+
+    }
     static void addVehicle(const vehicle v)
     {
         try
@@ -261,8 +295,9 @@ static json selectAllJSON_nlohmann(const string &table)
             // Prepare SQL statement with parameters
             W.conn().prepare("insert_vehicle",
                              "INSERT INTO vehicles "
-                             "( id,number_of_wheels, brand, model, year, base_price, kilometers, age, damage_level, category, depreciation_factor, min_price, max_price) "
-                             "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,$13)");
+                             "( id,number_of_wheels, brand, model, year, base_price, kilometers, age, damage_level, category, depreciation_factor, min_price, max_price,vehicle_type) "
+                             "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,$13,$14)");
+                std::cout << "Vehicle type: [" << v.getType() << "]" << std::endl;
 
             // Execute prepared statement
             W.exec_prepared("insert_vehicle",
@@ -278,7 +313,8 @@ static json selectAllJSON_nlohmann(const string &table)
                             (v.getCategory()),
                             dep,
                             minP,
-                            maxP);
+                            maxP,
+                        v.getType());
 
             // Commit transaction
             W.commit();
@@ -353,43 +389,28 @@ bool checkLogin(unordered_set<string> session_ids, string session_id)
 }
 std::string get_cookie_value_manual(const httplib::Request &req, const std::string &key)
 {
-    // 1. Get the entire raw "Cookie" header (e.g., "session_id=abc; user=admin")
     std::string cookie_header = req.get_header_value("Cookie");
 
     if (cookie_header.empty())
     {
-        return ""; // No cookies sent
+        return "";
     }
 
-    // Prepare the key to search for (e.g., "session_id=")
     std::string search_key = key + "=";
-
-    // 2. Find the start position of the cookie key
     size_t start_pos = cookie_header.find(search_key);
 
     if (start_pos == std::string::npos)
     {
-        return ""; // Cookie key not found
+        return "";
     }
 
-    // Adjust start_pos to the beginning of the actual value
     start_pos += search_key.length();
-
-    // 3. Find the end position of the cookie value (either a semicolon or end of string)
     size_t end_pos = cookie_header.find(';', start_pos);
-
-    // If no semicolon is found, the value extends to the end of the header string
     if (end_pos == std::string::npos)
     {
         end_pos = cookie_header.length();
     }
-
-    // 4. Extract the substring (the cookie value)
     std::string value = cookie_header.substr(start_pos, end_pos - start_pos);
-
-    // Optional: Trim leading/trailing whitespace if present
-    // (A robust solution would handle trimming, but we omit it for simplicity here)
-
     return value;
 }
 int main()
@@ -441,6 +462,17 @@ int main()
                     res.status = 401; // Unauthorized
                 } });
 
+
+                svr.Get("/logout", [&session_ids](const httplib::Request &req, httplib::Response &res)
+             {  
+                res.set_header("Set-Cookie","session_id=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly");
+                res.status = 200;
+                res.set_redirect("/login.html");
+                
+            });
+
+
+
     svr.Get("/addVehicle.html", [&session_ids](const httplib::Request &req, httplib::Response &res)
             {
                 string session_id = get_cookie_value_manual(req, "session_id");
@@ -455,69 +487,8 @@ int main()
         string filecontent=filehandling::readFile("views/addVehicle.html");
         res.set_content((filecontent), "text/html"); });
 
-    // svr.Post("/addVehicle", [](const httplib::Request &req, httplib::Response &res)
-    //          {
-    //             const auto &form = req.form();
-    //             cout << "Trying to add vehicle" << endl;
-    //             try {
-    //     // 🔹 Extract form fields
-    //     string id              = req.get_param_value("id");
-    //     int numberOfWheels     = stoi(req.get_param_value("number_of_wheels"));
-    //     string brand           = req.get_param_value("brand");
-    //     string model           = req.get_param_value("model");
-    //     int year               = stoi(req.get_param_value("year"));
-    //     double basePrice       = stod(req.get_param_value("base_price"));
-    //     double kilometers      = stod(req.get_param_value("kilometers"));
-    //     int age                = stoi(req.get_param_value("age"));
-    //     int damageLevel        = stoi(req.get_param_value("damage_level"));
-    //     string category        = req.get_param_value("category");
-    //     // 🔹 Create the correct vehicle object
-    //     vehicle* v = nullptr;
-    //     if (category == "Sedan")
-    //         v = new sedan(brand, model, year, id, basePrice, kilometers, age, damageLevel);
-    //     else if (category == "Coupe")
-    //         v = new coupe(brand, model, year, id, basePrice, kilometers, age, damageLevel);
-    //     else if (category == "Hatchback")
-    //         v = new hatchback(brand, model, year, id, basePrice, kilometers, age, damageLevel);
-    //     else if (category == "Convertible")
-    //         v = new convertible(brand, model, year, id, basePrice, kilometers, age, damageLevel);
-    //     else if (category == "Supercar")
-    //         v = new supercar(brand, model, year, id, basePrice, kilometers, age, damageLevel);
-    //     else
-    //         throw runtime_error("Unknown vehicle category");
-    //     v->depreciationFactor();
-    //     v->minPrice();
-    //     v->maxPrice();
-
-    //     std::string image_path;
-    //     // 🔹 Insert into database
-    //     database::addVehicle(*v);
-    //     delete v;
-    //     if (form.has_file("image")) {
-    //         auto file = form.get_file("image");
-
-    //         std::string filename = "./uploads/" + file.filename;
-    //         std::ofstream ofs(filename, std::ios::binary);
-    //         ofs << file.content;
-    //         ofs.close();
-
-    //         std::cout << "✅ File saved: " << filename << std::endl;
-    //     } else {
-    //         std::cout << "⚠️ No file uploaded" << std::endl;
-    //     }
-    // }
-    //     // 🔹 Respond to the client
-    //     res.set_redirect("/");
-    // }
-    // catch (const exception& e) {
-    //     cerr << "❌ Error adding vehicle: " << e.what() << endl;
-    //     res.status = 400;
-    //     res.set_content(string("Error: ") + e.what(), "text/plain");
-    //     res.set_redirect("/addVehicle.html");
-
-    // } });
-
-    svr.Post("/addVehicle", [](const httplib::Request &req, httplib::Response &res) {
+    svr.Post("/addVehicle", [](const httplib::Request &req, httplib::Response &res)
+             {
     std::cout << "🚗 Received request to add vehicle" << std::endl;
 
     try {
@@ -525,8 +496,8 @@ int main()
         const auto &form = req.form;
 
         // ✅ Extract form fields safely
-        std::string id              = form.get_field("id");
-        int numberOfWheels          = std::stoi(form.get_field("number_of_wheels"));
+        std::string id              = database::newId();
+        // int numberOfWheels          = std::stoi(form.get_field("number_of_wheels"));
         std::string brand           = form.get_field("brand");
         std::string model           = form.get_field("model");
         int year                    = std::stoi(form.get_field("year"));
@@ -587,11 +558,10 @@ int main()
         res.status = 400;
         res.set_content(std::string("Error adding vehicle: ") + e.what(), "text/plain");
         res.set_redirect("/addVehicle.html");
-    }
-});
+    } });
 
-
-    svr.Get("/api/vehicles", [&session_ids](const httplib::Request &req, httplib::Response &res) {
+    svr.Get("/api/vehicles", [&session_ids](const httplib::Request &req, httplib::Response &res)
+            {
     try {
         cout << "hi" << endl;
     string session_id = get_cookie_value_manual(req, "session_id");
@@ -615,9 +585,7 @@ int main()
         std::cerr << "❌ /api/vehicles error: " << e.what() << std::endl;
         res.status = 500;
         res.set_content(std::string("{\"error\":\"") + e.what() + "\"}", "application/json");
-    }
-});
-
+    } });
 
     bool ret = svr.set_mount_point("/", "./templates");
     if (!ret)
@@ -626,6 +594,5 @@ int main()
     }
     cout << "Server listening on http://localhost:8080" << endl;
     svr.listen("localhost", 8080);
-
     return 0;
 }
