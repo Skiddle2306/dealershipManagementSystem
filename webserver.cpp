@@ -51,7 +51,6 @@ public:
     void setType(string t) { vehicle_type=t; }
     void setNumberOfWheels(int t) { numberOfWheels=t; }
 
-    // --- pricing logic ---
     double depreciationFactor() const
     {
         double kmFactor = min(0.50, kilometers / 200000.0);
@@ -126,7 +125,6 @@ public:
     }
 };
 
-// subcategories
 class sports : public bike
 {
 public:
@@ -171,7 +169,6 @@ public:
     }
 };
 
-// subcategories
 class pickup : public truck
 {
 public:
@@ -236,8 +233,6 @@ public:
                     cout << " | ";
             }
             cout << "\n---------------------\n";
-
-            // Print rows
             for (const auto &row : r)
             {
                 for (pqxx::row::size_type col = 0; col < row.size(); ++col)
@@ -258,19 +253,16 @@ public:
     static json selectAllJSON_nlohmann(const string &table)
     {
         json arr = json::array();
-
         try
         {
             pqxx::nontransaction txn(*conn);
             pqxx::result r = txn.exec("SELECT * FROM " + table);
-
             for (const auto &row : r)
             {
                 json obj;
                 for (pqxx::row::size_type col = 0; col < row.size(); ++col)
                 {
                     const string name = r.column_name(col);
-
                     if (row[col].is_null())
                     {
                         obj[name] = nullptr;
@@ -278,11 +270,8 @@ public:
                     else
                     {
                         string sval = row[col].c_str();
-
-                        // Try to parse as integer then double; fallback to string.
                         try
                         {
-                            // try integer
                             long long ival = stoll(sval);
                             obj[name] = ival;
                         }
@@ -346,7 +335,7 @@ public:
         pqxx::nontransaction txn(*conn);
         pqxx::result r = txn.exec("SELECT MAX(id) AS max_id FROM vehicles");
 
-        int new_id=1;; // default if table is empty
+        int new_id=1;; 
         if (!r.empty() && !r[0]["max_id"].is_null()) {
             new_id = (r[0]["max_id"].as<int>() + 1);
         }
@@ -354,7 +343,7 @@ public:
         return to_string(new_id);
     } catch (const std::exception& e) {
         std::cerr << "Database error: " << e.what() << std::endl;
-        return "-1"; // indicate error
+        return "-1"; 
     }
 
     }
@@ -366,7 +355,6 @@ public:
             double dep = v.depreciationFactor();
             double minP = v.minPrice();
             double maxP = v.maxPrice();
-            // Prepare SQL statement with parameters
             W.exec_params("INSERT INTO vehicles "
               "(id, number_of_wheels, brand, model, year, base_price, kilometers, age, damage_level, category, depreciation_factor, min_price, max_price, vehicle_type) "
               "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
@@ -429,13 +417,10 @@ string generate_session_id()
 {
     const char hex_chars[] = "0123456789abcdef";
     std::string session_id = "";
-
-    // A session ID length of 32 characters (16 bytes) is common
     const int ID_LENGTH = 32;
 
     for (int i = 0; i < ID_LENGTH; ++i)
     {
-        // Get a random index into the hex_chars array
         int index = std::rand() % 16;
         session_id += hex_chars[index];
     }
@@ -513,21 +498,16 @@ int main()
 
                     string session_id = generate_session_id();
                     session_ids.insert(session_id);
-                    // active_sessions[session_id] = username;
-
-                    // // 4. Issue the Session Cookie
-                    // // The format is: "key=value; Path=/; Max-Age=..."
                      std::string cookie_header = "session_id=" + session_id + "; Path=/; Max-Age=3600"; // Expires in 1 hour
                      res.set_header("Set-Cookie", cookie_header.c_str());
 
-                    // // Redirect to a protected page
                     res.set_redirect("/");
                 }
                 else
                 {
                     // Failed Login
                     res.set_content("Invalid credentials. <a href='/login.html'>Try again</a>", "text/html");
-                    res.status = 401; // Unauthorized
+                    res.status = 401; 
                 } });
 
 
@@ -560,10 +540,8 @@ int main()
     std::cout << "🚗 Received request to add vehicle" << std::endl;
 
     try {
-        // ✅ Get multipart form data
         const auto &form = req.form;
 
-        // ✅ Extract form fields safely
         std::string id              = database::newId();
         // int numberOfWheels          = std::stoi(form.get_field("number_of_wheels"));
         std::string brand           = form.get_field("brand");
@@ -577,7 +555,6 @@ int main()
 
         
 
-        // ✅ Create correct vehicle object
         vehicle *v = nullptr;
 if (category == "Sedan")
     v = new sedan(brand, model, year, id, basePrice, kilometers, age, damageLevel);
@@ -604,21 +581,17 @@ else if (category == "Tow")
 else
     throw std::runtime_error("Unknown vehicle category");
 
-        // ✅ Compute prices
         v->depreciationFactor();
         v->minPrice();
         v->maxPrice();
 
-        // ✅ Insert into database
         database::addVehicle(*v);
         delete v;
         std::string image_path = "./templates/"+id+".png";;
 
-        // ✅ Handle file upload
         if (form.has_file("image")) {
     auto file = form.get_file("image");
 
-    // Force the image to be named after the vehicle ID
     std::string filename = "./templates/" + id + ".png";
 
     std::ofstream ofs(filename, std::ios::binary);
@@ -630,7 +603,6 @@ else
 } else {
     std::cout << "⚠️ No file uploaded" << std::endl;
 }
-        // ✅ Redirect on success
         res.set_redirect("/");
     }
     catch (const std::exception &e) {

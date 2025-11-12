@@ -627,6 +627,10 @@
   <div class="container">
     <aside class="sidebar">
       <div class="filter-group">
+        <h3>Vehicle Type</h3>
+        <div id="vehicleTypeFilters"></div>
+      </div>
+      <div class="filter-group">
         <h3>Brand</h3>
         <div id="brandFilters"></div>
       </div>
@@ -671,7 +675,7 @@
 
   <script>
     let allVehicles = [];
-    let activeFilters = { brand: null, category: null, year: null };
+    let activeFilters = { vehicle_type: null, brand: null, category: null, year: null };
     
     // Load vehicles from server
     async function loadVehicles() {
@@ -714,6 +718,7 @@
     
     // Render filter options
     function renderFilters(data) {
+      const vehicleTypes = [...new Set(data.map(v => v.vehicle_type))].filter(Boolean);
       const brands = [...new Set(data.map(v => v.brand))].filter(Boolean);
       const categories = [...new Set(data.map(v => v.category))].filter(Boolean);
       const years = [...new Set(data.map(v => v.year))].filter(Boolean).sort((a, b) => b - a);
@@ -726,6 +731,7 @@
           </label>
         `).join("");
       
+      document.getElementById("vehicleTypeFilters").innerHTML = makeOptions(vehicleTypes, "vehicle_type");
       document.getElementById("brandFilters").innerHTML = makeOptions(brands, "brand");
       document.getElementById("categoryFilters").innerHTML = makeOptions(categories, "category");
       document.getElementById("yearFilters").innerHTML = makeOptions(years, "year");
@@ -745,7 +751,7 @@
     
     // Clear all filters
     document.getElementById("clearFilters").addEventListener("click", () => {
-      activeFilters = { brand: null, category: null, year: null };
+      activeFilters = { vehicle_type: null, brand: null, category: null, year: null };
       document.querySelectorAll(".sidebar input[type=radio]").forEach(i => i.checked = false);
       renderVehicles(allVehicles);
     });
